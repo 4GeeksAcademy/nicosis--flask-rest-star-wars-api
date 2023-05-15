@@ -8,7 +8,7 @@ from flask_swagger import swagger
 from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
-from models import db, User
+from models import db, User, Galaxy, Planet, Character
 #from models import Person
 
 app = Flask(__name__)
@@ -31,19 +31,44 @@ setup_admin(app)
 def handle_invalid_usage(error):
     return jsonify(error.to_dict()), error.status_code
 
+# En princpio, esta API será usada con autentificacion. Vamos a emular que un usuario ya se ha identificado. 
+current_logged_user_id = 1
+
+
 # generate sitemap with all your endpoints
 @app.route('/')
 def sitemap():
     return generate_sitemap(app)
 
+# get users
 @app.route('/user', methods=['GET'])
 def handle_hello():
 
-    response_body = {
-        "msg": "Hello, this is your GET /user response "
-    }
+    users = User.query.all()
+    all_users = list(map(lambda x: x.serialize(), users))
+    return jsonify(all_users), 200
 
-    return jsonify(response_body), 200
+# get galaxies
+@app.route('/galaxy', methods=['GET'])
+def get_galaxies():
+
+    galaxies = Galaxy.query.all()
+    all_galaxies = list(map(lambda x: x.serialize(), galaxies))
+    return jsonify(all_galaxies), 200
+
+# get planets
+@app.route('/planet', methods=['GET'])
+def get_planets():
+
+    planets = Planet.query.all()
+    all_planets = list(map(lambda x: x.serialize(), planets))
+    return jsonify(all_planets), 200
+
+@app.route('/character', methods=['GET'])
+def get_character():
+    allCharacters = Character.query.all()
+    result = [element.serialize() for element in allCharacters]
+    return jsonify(result), 200
 
 # this only runs if `$ python src/app.py` is executed
 if __name__ == '__main__':
